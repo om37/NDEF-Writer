@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">NdefWriter</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+	<string name="welcome"> OM37\'s NFC-NDEF Tag Writer</string>
+	<string name="btnWriterString"> Write! </string>
+	<string name=writeBoxHint"> Enter text to write &&;#8230; </string>
+</resources>
