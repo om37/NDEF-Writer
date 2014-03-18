@@ -18,6 +18,7 @@ import android.content.IntentFilter.MalformedMimeTypeException;
 import android.content.res.Resources.Theme;
 import android.view.Menu;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -47,6 +48,9 @@ public class WelcomeActivity extends Activity {
 	public void writeButton(View theView)
 	{
 		messageToWrite = createNdefMessage();
+		
+		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromInputMethod(((EditText)findViewById(R.id.txtToWrite)).getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 		
 		writeMode = true;//We are in write mode
 		
