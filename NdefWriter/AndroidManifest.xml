@@ -7,6 +7,8 @@
     <uses-sdk
         android:minSdkVersion="14"
         android:targetSdkVersion="17" />
+    
+    <uses-permission android:name="android.permission.NFC" /> <!-- Request NFC permission -->
 
     <application
         android:allowBackup="true"
