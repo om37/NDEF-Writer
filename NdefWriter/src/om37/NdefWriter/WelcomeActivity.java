@@ -19,6 +19,7 @@ import android.content.res.Resources.Theme;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -69,16 +70,25 @@ public class WelcomeActivity extends Activity {
 	public NdefMessage createNdefMessage()
 	{
 		EditText txtEntry = (EditText) findViewById(R.id.txtToWrite);
+		CheckBox chk = (CheckBox)findViewById(R.id.chkAttendance);
+
 		String theContents = txtEntry.getText().toString();//Get text from user entry
 
 		if(theContents.length() <= 0)
 			theContents = "This is some text from om37.NdefWriter";
 		
 		NdefRecord textRecord = NdefRecord.createMime("text/plain", theContents.getBytes());//Create text record from entered text
-		NdefRecord phpCallAar = NdefRecord.createApplicationRecord("om37.phpcall");//AAR to start phpcall
+		NdefRecord aar;
+		
+		//Create aar to start app
+		if(chk.isChecked())
+			aar = NdefRecord.createApplicationRecord("om37.attendancetracker");
+		else
+			aar = NdefRecord.createApplicationRecord("om37.phpcall");
+		
 		//NdefRecord aar = NdefRecord.createApplicationRecord(getPackageName());//Creates aar for this package/app
 		
-		NdefMessage message = new NdefMessage(new NdefRecord[]{textRecord, phpCallAar});
+		NdefMessage message = new NdefMessage(new NdefRecord[]{textRecord, aar});
 
 		return message;
 	}	
