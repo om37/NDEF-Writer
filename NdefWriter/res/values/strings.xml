@@ -7,4 +7,6 @@
 	<string name="welcome"> OM37\'s NFC-NDEF Tag Writer</string>
 	<string name="btnWriterString"> Write! </string>
 	<string name="writeBoxHint"> Enter text to write </string>
+	<string name="writeMode">" WRITE MODE ACTIVE \n Touch tag to phone "</string>
+	<string name="chkString"> Attendance Tracker? </string>
 </resources>
