@@ -19,7 +19,6 @@ import android.content.res.Resources.Theme;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -48,47 +47,31 @@ public class WelcomeActivity extends Activity {
 
 	public void writeButton(View theView)
 	{
-		messageToWrite = createNdefMessage();//Create the NDEF message
+		messageToWrite = createNdefMessage();
 		
-		//Hide keyboard via InputMethodManager
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromInputMethod(((EditText)findViewById(R.id.txtToWrite)).getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 		
 		writeMode = true;//We are in write mode
-		findViewById(R.id.txtWriteMode).setVisibility(View.VISIBLE);
 		
-		showToast("Touch tag", false);//Alert user to write mode activation
-		
-		//Enable foreground dispatch so that when a tag is touched, onNewIntent(). is called
+		showToast("Touch tag", false);
 		mAdapter.enableForegroundDispatch(this, pending, intentFiltersArray, techListArray);		
+		//Prompt user to touch tag
+		//When tag is touched foreground dispatch will start on new intent.
 	}
 
-	/*
-	 * TO DO:
-	 *  Remember to change "om37.phpcall" to correct package name when other app is finished
-	 */
 	public NdefMessage createNdefMessage()
 	{
 		EditText txtEntry = (EditText) findViewById(R.id.txtToWrite);
-		CheckBox chk = (CheckBox)findViewById(R.id.chkAttendance);
-
-		String theContents = txtEntry.getText().toString();//Get text from user entry
+		String theContents = txtEntry.getText().toString();
 
 		if(theContents.length() <= 0)
 			theContents = "This is some text from om37.NdefWriter";
 		
-		NdefRecord textRecord = NdefRecord.createMime("text/plain", theContents.getBytes());//Create text record from entered text
-		NdefRecord aar;
-		
-		//Create aar to start app
-		if(chk.isChecked())
-			aar = NdefRecord.createApplicationRecord("om37.attendancetracker");
-		else
-			aar = NdefRecord.createApplicationRecord("om37.phpcall");
-		
+		NdefRecord textRecord = NdefRecord.createMime("text/plain", theContents.getBytes());
+		NdefRecord phpCallAar = NdefRecord.createApplicationRecord("om37.phpcall");//Aar for phpcall
 		//NdefRecord aar = NdefRecord.createApplicationRecord(getPackageName());//Creates aar for this package/app
-		
-		NdefMessage message = new NdefMessage(new NdefRecord[]{textRecord, aar});
+		NdefMessage message = new NdefMessage(new NdefRecord[]{textRecord, phpCallAar});
 
 		return message;
 	}	
@@ -115,7 +98,7 @@ public class WelcomeActivity extends Activity {
 	@Override
 	public void onNewIntent(Intent intent)
 	{		
-		final Ndef ndefTag = Ndef.get((Tag)intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));//Get tag from intent
+		final Ndef ndefTag = Ndef.get((Tag)intent.getParcelableExtra(NfcAdapter.EXTRA_TAG));
 		if(writeMode)
 		{
 			//Write to tag
@@ -123,13 +106,12 @@ public class WelcomeActivity extends Activity {
 		}
 		else
 		{
-			//Shouldn't be called if not in write mode.
-			//Do Something else...
+			//Something else...
 			//Maybe display tag's contents
 		}		
 	}
 
-	public void writeToTag(final Ndef ndefTag)//Ndef has to be final for use in Runnable
+	public void writeToTag(final Ndef ndefTag)
 	{
 		final Handler handler = new Handler();
 		Runnable r = new Runnable()
@@ -139,9 +121,7 @@ public class WelcomeActivity extends Activity {
 			{					
 				if(messageToWrite == null)
 				{
-					doToastHandler("Message is null. Returning", false);
-					endWriteMode();
-					return;
+					doToastHandler("Message is null", false);
 				}
 
 				if(ndefTag != null && ndefTag.isWritable())
@@ -181,7 +161,6 @@ public class WelcomeActivity extends Activity {
 					public void run()
 					{
 						writeMode = false;
-						findViewById(R.id.txtWriteMode).setVisibility(View.INVISIBLE);
 						mAdapter.disableForegroundDispatch(self);
 					}
 				});
@@ -209,8 +188,7 @@ public class WelcomeActivity extends Activity {
 				new Intent(this,getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
 				0
 				);		
-		
-		IntentFilter ndefPlainTextFilter = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);//Listen for NDEF discoveries		
+		IntentFilter ndefPlainTextFilter = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);		
 		try
 		{
 			//ndefPlainTextFilter.addDataType("text/plain");
@@ -218,7 +196,6 @@ public class WelcomeActivity extends Activity {
 		}
 		catch(MalformedMimeTypeException e)
 		{
-			e.printStackTrace();
 		}
 		intentFiltersArray = new IntentFilter[]{ndefPlainTextFilter,};
 		techListArray = new String[][]{new String[]{Ndef.class.getName()}};

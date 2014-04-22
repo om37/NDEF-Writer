@@ -6,7 +6,7 @@
     
     tools:context=".WelcomeActivity" >
     
-    <TextView android:id="@+id/txtWelcome"
+    <TextView android:id="@+id/wrap_content"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
@@ -23,13 +23,6 @@
         
         android:layout_marginBottom="10dp"
         />
-    
-    <CheckBox android:id="@+id/chkAttendance"
-        android:layout_gravity="center_horizontal"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/chkString"
-        />
         
     <Button android:id="@+id/btnWriter"
         android:layout_width="wrap_content"
@@ -37,16 +30,6 @@
         android:layout_gravity="center_horizontal"
         android:text="@string/btnWriterString"
         android:onClick="writeButton"
-        />
-    
-    <TextView android:id="@+id/txtWriteMode"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:visibility="invisible"
-        android:text="@string/writeMode"
-        
-        android:layout_marginBottom="10dp"
         />
 
 </LinearLayout>
