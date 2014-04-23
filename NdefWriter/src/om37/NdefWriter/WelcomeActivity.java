@@ -23,6 +23,11 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * 
+ * @author om37
+ *
+ */
 public class WelcomeActivity extends Activity {
 	
 	Activity self = this;
@@ -69,6 +74,7 @@ public class WelcomeActivity extends Activity {
 	 */
 	public NdefMessage createNdefMessage()
 	{
+		String mimeType = "application/om37.ndefwriter";
 		EditText txtEntry = (EditText) findViewById(R.id.txtToWrite);
 		CheckBox chk = (CheckBox)findViewById(R.id.chkAttendance);
 
@@ -78,6 +84,7 @@ public class WelcomeActivity extends Activity {
 			theContents = "This is some text from om37.NdefWriter";
 		
 		NdefRecord textRecord = NdefRecord.createMime("text/plain", theContents.getBytes());//Create text record from entered text
+		NdefRecord textRecord2 = new NdefRecord(NdefRecord.TNF_MIME_MEDIA,mimeType.getBytes(),new byte[0], theContents.getBytes());
 		NdefRecord aar;
 		
 		//Create aar to start app
@@ -88,7 +95,7 @@ public class WelcomeActivity extends Activity {
 		
 		//NdefRecord aar = NdefRecord.createApplicationRecord(getPackageName());//Creates aar for this package/app
 		
-		NdefMessage message = new NdefMessage(new NdefRecord[]{textRecord, aar});
+		NdefMessage message = new NdefMessage(new NdefRecord[]{ textRecord2 });
 
 		return message;
 	}	
@@ -126,6 +133,7 @@ public class WelcomeActivity extends Activity {
 			//Shouldn't be called if not in write mode.
 			//Do Something else...
 			//Maybe display tag's contents
+			//Or ignore...
 		}		
 	}
 
@@ -201,6 +209,7 @@ public class WelcomeActivity extends Activity {
 				t.show();
 	}
 
+	
 	public void setupPendingActivity()
 	{
 		pending = PendingIntent.getActivity(
