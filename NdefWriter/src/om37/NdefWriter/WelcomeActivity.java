@@ -90,10 +90,10 @@ public class WelcomeActivity extends Activity {
 		//Create aar to start app
 		if(chk.isChecked())
 			aar = NdefRecord.createApplicationRecord("om37.attendancetracker");
-		else
+		/*//For debugging
+		  else
 			aar = NdefRecord.createApplicationRecord("om37.phpcall");
-		
-		//NdefRecord aar = NdefRecord.createApplicationRecord(getPackageName());//Creates aar for this package/app
+		*/ 
 		
 		NdefMessage message = new NdefMessage(new NdefRecord[]{ textRecord2 });
 
