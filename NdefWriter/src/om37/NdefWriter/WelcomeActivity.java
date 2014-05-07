@@ -84,7 +84,13 @@ public class WelcomeActivity extends Activity {
 			theContents = "This is some text from om37.NdefWriter";
 		
 		NdefRecord textRecord = NdefRecord.createMime("text/plain", theContents.getBytes());//Create text record from entered text
-		NdefRecord textRecord2 = new NdefRecord(NdefRecord.TNF_MIME_MEDIA,mimeType.getBytes(),new byte[0], theContents.getBytes());
+		NdefRecord textRecord2 = new NdefRecord(
+				NdefRecord.TNF_MIME_MEDIA,//tnf
+				mimeType.getBytes(),//mime type
+				new byte[0],//id 
+				theContents.getBytes()//payload
+		);
+		
 		NdefRecord aar;
 		
 		//Create aar to start app
