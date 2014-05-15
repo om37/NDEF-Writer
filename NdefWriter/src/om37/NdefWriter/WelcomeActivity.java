@@ -19,9 +19,8 @@ import android.content.res.Resources.Theme;
 import android.view.Menu;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.TextView;
 
 /**
  * 
@@ -29,24 +28,31 @@ import android.widget.Toast;
  *
  */
 public class WelcomeActivity extends Activity {
-	
+
 	Activity self = this;
-	
+
 	NfcAdapter mAdapter;
 
 	NdefMessage messageToWrite;
+
+	TextView tv;
 
 	PendingIntent pending;
 	IntentFilter[] intentFiltersArray;
 	String[][] techListArray;
 	boolean writeMode;
+	String statusMessage;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.welcome_screen);
 		setupPendingActivity();
-		
+
+		//TextView 
+		tv = (TextView)findViewById(R.id.txtWriteMode);
+		tv.setText("Write mode disabled. Hit 'Write' to enable.");
+
 		mAdapter = NfcAdapter.getDefaultAdapter(getApplicationContext());		
 		writeMode = false;
 	}
@@ -54,16 +60,19 @@ public class WelcomeActivity extends Activity {
 	public void writeButton(View theView)
 	{
 		messageToWrite = createNdefMessage();//Create the NDEF message
-		
+		if(messageToWrite == null)
+		{
+			return;
+		}		
+
 		//Hide keyboard via InputMethodManager
 		InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
 		imm.hideSoftInputFromInputMethod(((EditText)findViewById(R.id.txtToWrite)).getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-		
+
 		writeMode = true;//We are in write mode
-		findViewById(R.id.txtWriteMode).setVisibility(View.VISIBLE);
-		
-		showToast("Touch tag", false);//Alert user to write mode activation
-		
+		tv.setText("WRITE MODE ACTIVE!\nTouch tag to phone");
+		findViewById(R.id.btnWriter).setEnabled(false);
+
 		//Enable foreground dispatch so that when a tag is touched, onNewIntent(). is called
 		mAdapter.enableForegroundDispatch(this, pending, intentFiltersArray, techListArray);		
 	}
@@ -74,34 +83,26 @@ public class WelcomeActivity extends Activity {
 	 */
 	public NdefMessage createNdefMessage()
 	{
-		String mimeType = "application/om37.ndefwriter";
+		String mimeType = "application/om37.ndefwriter";//custom mime, listened for by reader app. AAR wouldn't work
 		EditText txtEntry = (EditText) findViewById(R.id.txtToWrite);
-		CheckBox chk = (CheckBox)findViewById(R.id.chkAttendance);
 
 		String theContents = txtEntry.getText().toString();//Get text from user entry
 
 		if(theContents.length() <= 0)
-			theContents = "This is some text from om37.NdefWriter";
-		
-		NdefRecord textRecord = NdefRecord.createMime("text/plain", theContents.getBytes());//Create text record from entered text
+		{
+			tv.setText("Write mode disabled. No text was entered.");//Possible change here!
+			return null;
+		}
+
+		NdefRecord textRecord = NdefRecord.createMime(mimeType, theContents.getBytes());//Create text record from entered text
 		NdefRecord textRecord2 = new NdefRecord(
 				NdefRecord.TNF_MIME_MEDIA,//tnf
 				mimeType.getBytes(),//mime type
 				new byte[0],//id 
 				theContents.getBytes()//payload
-		);
-		
-		NdefRecord aar;
-		
-		//Create aar to start app
-		if(chk.isChecked())
-			aar = NdefRecord.createApplicationRecord("om37.attendancetracker");
-		/*//For debugging
-		  else
-			aar = NdefRecord.createApplicationRecord("om37.phpcall");
-		*/ 
-		
-		NdefMessage message = new NdefMessage(new NdefRecord[]{ textRecord2 });
+				);
+
+		NdefMessage message = new NdefMessage(new NdefRecord[]{ textRecord });
 
 		return message;
 	}	
@@ -153,41 +154,37 @@ public class WelcomeActivity extends Activity {
 			{					
 				if(messageToWrite == null)
 				{
-					doToastHandler("Message is null. Returning", false);
+					statusMessage = "Write failed:\nNo NDEF message was created";
 					endWriteMode();
 					return;
 				}
 
-				if(ndefTag != null && ndefTag.isWritable())
+				if(ndefTag.isWritable())
 				{
-					try
+					if(ndefTag != null)
 					{
-						ndefTag.connect();
-						ndefTag.writeNdefMessage(messageToWrite);
-						ndefTag.close();
-						doToastHandler("Write complete", false);
-						endWriteMode();
-					}
-					catch(Exception e)
-					{
-						e.printStackTrace();
-						doToastHandler("Write FAILED", false);
-						endWriteMode();
+						try
+						{
+							ndefTag.connect();
+							ndefTag.writeNdefMessage(messageToWrite);
+							ndefTag.close();
+							statusMessage = "Tag written. Hit 'Write' to write to another";
+							endWriteMode();
+						}
+						catch(Exception e)
+						{
+							e.printStackTrace();
+							statusMessage = "Tag NOT written. Exception:\n" + e.getMessage();
+							endWriteMode();
+						}
 					}
 				}
-			}
-			
-			public void doToastHandler(final String message, final boolean longShow)
-			{
-				handler.post(new Runnable()
+				else
 				{
-					public void run()
-					{
-						showToast(message, longShow);
-					}
-				});
+					statusMessage="The tag is not writable";
+				}
 			}
-			
+
 			public void endWriteMode()
 			{
 				handler.post(new Runnable()
@@ -195,27 +192,18 @@ public class WelcomeActivity extends Activity {
 					public void run()
 					{
 						writeMode = false;
-						findViewById(R.id.txtWriteMode).setVisibility(View.INVISIBLE);
+						findViewById(R.id.btnWriter).setEnabled(true);
+						tv.setText("Write mode disabled.\n" + statusMessage);
 						mAdapter.disableForegroundDispatch(self);
 					}
 				});
 			}
 		};
-		
+
 		Thread t = new Thread(r);
 		t.start();
 	}
-	
-	public void showToast(String text, boolean longShow)
-	{
-		Toast t = longShow ? 
-				Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG) :
-					Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
 
-				t.show();
-	}
-
-	
 	public void setupPendingActivity()
 	{
 		pending = PendingIntent.getActivity(
@@ -224,7 +212,7 @@ public class WelcomeActivity extends Activity {
 				new Intent(this,getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
 				0
 				);		
-		
+
 		IntentFilter ndefPlainTextFilter = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);//Listen for NDEF discoveries		
 		try
 		{
