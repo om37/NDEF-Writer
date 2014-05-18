@@ -5,11 +5,14 @@
     <string name="action_settings">Settings</string>
     
     <string name="title">OM37\nAttendance\nWriter</string>
+    <string name="welcome">Welcome!</string>
     
     <string name="statusMessage">Status Messages:</string>
+    <string name="instruction">To write a tag:\n1) Enter the room number above.\n2) Hit \'Write\' button.\n3) At the prompt, tap your device to the tag</string>
     
     <string name="hello_world">Hello world!</string>
 	<string name="btnWriterString"> Write! </string>
+	<string name="btnCancelString"> Cancel! </string>
 	<string name="writeBoxHint"> Enter text to write </string>
 	<string name="chkString"> Attendance Tracker? </string>
 </resources>
