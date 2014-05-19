@@ -45,6 +45,13 @@ public class WelcomeActivity extends Activity {
 	boolean writeMode;
 	String statusMessage;
 
+	/**
+	 * Called when app is started
+	 * Assign global TextView, statusDisplay
+	 * 
+	 * Initialise writeMode to false
+	 * Prepare pending activity
+	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -59,6 +66,18 @@ public class WelcomeActivity extends Activity {
 		writeMode = false;
 	}
 
+	/**
+	 * Event handler for write button
+	 * 
+	 * Hide keyboard to make sure status box is visible
+	 * Hide instructions and welcome message
+	 * 
+	 * Show  status bar and message area
+	 * Create NDEF message
+	 * Enable foreground dispatch - implement writing to tag in onNewIntent()
+	 * 
+	 * @param theView requires as this is called in response to button press
+	 */
 	public void writeButton(View theView)
 	{		
 		//Hide keyboard via InputMethodManager
@@ -87,6 +106,17 @@ public class WelcomeActivity extends Activity {
 		mAdapter.enableForegroundDispatch(this, pending, intentFiltersArray, techListArray);		
 	}
 	
+	/**
+	 * Button handler for cancel button
+	 * 
+	 * Ends write mode
+	 * Disables foreground dispatch
+	 * Updates status message to user
+	 * Re-enable write button
+	 * 
+	 * Hide cancel button
+	 * @param theButton
+	 */
 	public void cancelButton(View theButton)
 	{
 		mAdapter.disableForegroundDispatch(this);
@@ -97,9 +127,16 @@ public class WelcomeActivity extends Activity {
 		findViewById(R.id.btnWriter).setEnabled(true);
 	}
 
-	/*
-	 * TO DO:
-	 *  Remember to change "om37.phpcall" to correct package name when other app is finished
+	/**
+	 * Called when write button is pressed
+	 * This method prepares a properly formed NDEF message
+	 * using the custom mime type taken from this app's
+	 * package name.
+	 * 
+	 * If EditText is empty do nothing and return error
+	 * Else take the entered text and create an NDEF message from it
+	 * 
+	 * @return the created NDEF message
 	 */
 	public NdefMessage createNdefMessage()
 	{
@@ -135,6 +172,9 @@ public class WelcomeActivity extends Activity {
 		return true;
 	}
 
+	/**
+	 * Hide onscreen keyboard.
+	 */
 	@Override
 	public void onPause()
 	{
@@ -144,12 +184,10 @@ public class WelcomeActivity extends Activity {
 		imm.hideSoftInputFromWindow(findViewById(R.id.txtToWrite).getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
 	}
 
-	@Override
-	public void onResume()
-	{
-		super.onResume();
-	}
-
+	/**
+	 * If write mode active, write text
+	 * to tag in intent
+	 */
 	@Override
 	public void onNewIntent(Intent intent)
 	{		
@@ -168,6 +206,18 @@ public class WelcomeActivity extends Activity {
 		}		
 	}
 
+	/**
+	 * Uses runnable to write a message to a tag
+	 * Perform required validation
+	 * (message isn't tull,
+	 * tag isn't read only,
+	 * etc)
+	 * Write to tag
+	 * 
+	 * Update status message area
+	 * with error or success
+	 * @param ndefTag
+	 */
 	public void writeToTag(final Ndef ndefTag)//Ndef has to be final for use in Runnable
 	{
 		final Handler handler = new Handler();
@@ -241,6 +291,13 @@ public class WelcomeActivity extends Activity {
 		t.start();
 	}
 
+	/**
+	 * Sets up the pending activity object required to use foreground dispatch
+	 * Uses PendingIntent.getActivity() to instantiate the object and then creates
+	 * an array of IntentFilters and a techList array.
+	 * 
+	 * This is called from onCreate();
+	 */
 	public void setupPendingActivity()
 	{
 		pending = PendingIntent.getActivity(
