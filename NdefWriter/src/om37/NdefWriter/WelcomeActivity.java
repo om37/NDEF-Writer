@@ -66,7 +66,7 @@ public class WelcomeActivity extends Activity {
 		imm.hideSoftInputFromWindow(findViewById(R.id.txtToWrite).getWindowToken(),InputMethodManager.HIDE_NOT_ALWAYS);
 
 		findViewById(R.id.txtInstruction).setVisibility(View.GONE);
-		findViewById(R.id.txtWelcome).setVisibility(View.GONE);
+		findViewById(R.id.txtWelcome).setVisibility(View.INVISIBLE);
 
 		findViewById(R.id.txtStatus).setVisibility(View.VISIBLE);
 		findViewById(R.id.txtStatusMessage).setVisibility(View.VISIBLE);
